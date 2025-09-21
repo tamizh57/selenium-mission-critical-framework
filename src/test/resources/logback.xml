@@ -1,0 +1,64 @@
+<configuration>
+
+    <!-- ========================= -->
+    <!-- Console logging (all) -->
+    <!-- ========================= -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg [%X{testName}]%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- ========================= -->
+    <!-- Global rolling file (all tests) -->
+    <!-- ========================= -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/framework.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/archive/framework-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg [%X{testName}]%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- ========================= -->
+    <!-- Per-test rolling file via MDC -->
+    <!-- ========================= -->
+    <appender name="PER_TEST_FILE" class="ch.qos.logback.classic.sift.SiftingAppender">
+        <discriminator class="ch.qos.logback.classic.sift.MDCBasedDiscriminator">
+            <Key>testName</Key>
+            <DefaultValue>none</DefaultValue>
+        </discriminator>
+
+        <sift>
+            <appender name="PER_TEST_FILE_${testName}" class="ch.qos.logback.core.rolling.RollingFileAppender">
+                <file>logs/tests/${testName}.log</file>
+                <append>true</append>
+                <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                    <fileNamePattern>logs/tests/${testName}-%d{yyyy-MM-dd}.log</fileNamePattern>
+                    <maxHistory>5</maxHistory>
+                </rollingPolicy>
+                <encoder>
+                    <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+                </encoder>
+            </appender>
+        </sift>
+    </appender>
+
+    <!-- ========================= -->
+    <!-- Suppress TestNG internal logs if desired -->
+    <!-- ========================= -->
+    <logger name="org.testng" level="WARN"/>
+
+    <!-- ========================= -->
+    <!-- Root logger -->
+    <!-- ========================= -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="PER_TEST_FILE"/>
+    </root>
+
+</configuration>
